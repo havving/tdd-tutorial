@@ -2,12 +2,10 @@ package com.havving.membership.repository;
 
 import com.havving.membership.entity.Membership;
 import com.havving.membership.enums.MembershipType;
-import com.havving.membership.repository.MembershipRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
