@@ -4,6 +4,8 @@ import com.havving.membership.entity.Membership;
 import com.havving.membership.enums.MembershipType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 /**
  * @author HAVVING
  * @since 2021-09-16
@@ -11,4 +13,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface MembershipRepository extends JpaRepository<Membership, Long> {
 
     Membership findByUserIdAndMembershipType(final String userId, final MembershipType membershipType);
+
+    List<Membership> findAllByUserId(final String userId);
 }

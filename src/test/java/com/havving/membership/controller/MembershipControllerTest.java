@@ -1,8 +1,9 @@
 package com.havving.membership.controller;
 
 import com.google.gson.Gson;
+import com.havving.membership.dto.MembershipAddResponse;
+import com.havving.membership.dto.MembershipDetailResponse;
 import com.havving.membership.dto.MembershipRequest;
-import com.havving.membership.dto.MembershipResponse;
 import com.havving.membership.enums.MembershipType;
 import com.havving.membership.exception.MembershipErrorResult;
 import com.havving.membership.exception.MembershipException;
@@ -20,6 +21,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import static com.havving.membership.constants.MembershipConstants.USER_ID_HEADER;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,6 +57,7 @@ public class MembershipControllerTest {
         assertThat(mockMvc).isNotNull();
     }
 
+    // 멤버십 등록
     @Test
     public void membershipFailed_NoUserIdInHeaders() throws Exception {
         // given
@@ -133,9 +136,9 @@ public class MembershipControllerTest {
         // when
         final ResultActions resultActions = mockMvc.perform(
                 MockMvcRequestBuilders.post(url)
-                .header(USER_ID_HEADER, "12345")
-                .content(gson.toJson(membershipRequest(10000, MembershipType.NAVER)))
-                .contentType(MediaType.APPLICATION_JSON)
+                        .header(USER_ID_HEADER, "12345")
+                        .content(gson.toJson(membershipRequest(10000, MembershipType.NAVER)))
+                        .contentType(MediaType.APPLICATION_JSON)
         );
 
         // then
@@ -146,7 +149,7 @@ public class MembershipControllerTest {
     public void membershipAddSuccess() throws Exception {
         // given
         final String url = "/api/v1/membership";
-        final MembershipResponse membershipResponse = MembershipResponse.builder()
+        final MembershipAddResponse membershipResponse = MembershipAddResponse.builder()
                 .id(-1L)
                 .membershipType(MembershipType.NAVER)
                 .build();
@@ -158,20 +161,55 @@ public class MembershipControllerTest {
         // when
         final ResultActions resultActions = mockMvc.perform(
                 MockMvcRequestBuilders.post(url)
-                .header(USER_ID_HEADER, "12345")
-                .content(gson.toJson(membershipRequest(10000, MembershipType.NAVER)))
-                .contentType(MediaType.APPLICATION_JSON)
+                        .header(USER_ID_HEADER, "12345")
+                        .content(gson.toJson(membershipRequest(10000, MembershipType.NAVER)))
+                        .contentType(MediaType.APPLICATION_JSON)
         );
 
         // then
         resultActions.andExpect(status().isCreated());
 
-        final MembershipResponse response = gson.fromJson(resultActions.andReturn()
+        final MembershipAddResponse response = gson.fromJson(resultActions.andReturn()
                 .getResponse()
-                .getContentAsString(StandardCharsets.UTF_8), MembershipResponse.class);
+                .getContentAsString(StandardCharsets.UTF_8), MembershipAddResponse.class);
 
         assertThat(response.getMembershipType()).isEqualTo(MembershipType.NAVER);
         assertThat(response.getId()).isNotNull();
+    }
+
+    // 멤버십 전체 조회
+    @Test
+    public void membershipListFailed_NoUserIdInHeaders() throws Exception {
+        // given
+        final String url = "/api/v1/membership/list";
+
+        // when
+        final ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+        );
+
+        // then
+        resultActions.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void membershipListSuccess() throws Exception {
+        // given
+        final String url = "/api/v1/membership/list";
+        doReturn(Arrays.asList(
+                MembershipDetailResponse.builder().build(),
+                MembershipDetailResponse.builder().build(),
+                MembershipDetailResponse.builder().build()
+        )).when(membershipService).getMembershipList("12345");
+
+        // when
+        final ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+                .header(USER_ID_HEADER, "12345")
+        );
+
+        // then
+        resultActions.andExpect(status().isOk());
     }
 
 

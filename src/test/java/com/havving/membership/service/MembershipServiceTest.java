@@ -1,6 +1,7 @@
 package com.havving.membership.service;
 
-import com.havving.membership.dto.MembershipResponse;
+import com.havving.membership.dto.MembershipAddResponse;
+import com.havving.membership.dto.MembershipDetailResponse;
 import com.havving.membership.entity.Membership;
 import com.havving.membership.enums.MembershipType;
 import com.havving.membership.exception.MembershipErrorResult;
@@ -12,8 +13,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -33,6 +37,7 @@ public class MembershipServiceTest {
     private final MembershipType membershipType = MembershipType.NAVER;
     private final Integer point = 10000;
 
+    // 멤버십 등록
     @Test
     public void failedMembership_isExist() {
         // given
@@ -55,7 +60,7 @@ public class MembershipServiceTest {
 
         // when
 //        final Membership result = target.addMembership(userId, membershipType, point);
-        final MembershipResponse result = target.addMembership(userId, membershipType, point);
+        final MembershipAddResponse result = target.addMembership(userId, membershipType, point);
 
         // then
         assertThat(result.getId()).isNotNull();
@@ -64,6 +69,23 @@ public class MembershipServiceTest {
         // verify
         verify(membershipRepository, times(1)).findByUserIdAndMembershipType(userId, membershipType);
         verify(membershipRepository, times(1)).save(any(Membership.class));
+    }
+
+    // 멤버십 전체 조회
+    @Test
+    public void getMembership() {
+        // given
+        doReturn(Arrays.asList(
+                Membership.builder().build(),
+                Membership.builder().build(),
+                Membership.builder().build()
+        )).when(membershipRepository).findAllByUserId(userId);
+
+        // when
+        final List<MembershipDetailResponse> result = target.getMembershipList(userId);
+
+        // then
+        assertThat(result.size()).isEqualTo(3);
     }
 
     private Membership membership() {
