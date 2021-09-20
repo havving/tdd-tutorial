@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -86,6 +87,38 @@ public class MembershipServiceTest {
 
         // then
         assertThat(result.size()).isEqualTo(3);
+    }
+
+    // 멤버십 상세 조회
+    @Test
+    public void failedMembershipDetail_isNotExist() {
+        // given
+        doReturn(null).when(membershipRepository).findByUserIdAndMembershipType(userId, membershipType);
+
+        // when
+        final MembershipException result = assertThrows(MembershipException.class, () -> target.getMembership(userId, membershipType));
+
+        // then
+        assertThat(result.getErrorResult()).isEqualTo(MembershipErrorResult.MEMBERSHIP_NOT_FOUND);
+    }
+
+    @Test
+    public void getMembershipDetail() {
+        // given
+        doReturn(Membership.builder()
+                .id(-1L)
+                .membershipType(MembershipType.NAVER)
+                .point(point)
+                .createdAt(LocalDateTime.now())
+                .build()
+        ).when(membershipRepository).findByUserIdAndMembershipType(userId, membershipType);
+
+        // when
+        final MembershipDetailResponse result = target.getMembership(userId, membershipType);
+
+        // then
+        assertThat(result.getMembershipType()).isEqualTo(MembershipType.NAVER);
+        assertThat(result.getPoint()).isEqualTo(point);
     }
 
     private Membership membership() {

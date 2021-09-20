@@ -25,8 +25,7 @@ import java.util.Arrays;
 
 import static com.havving.membership.constants.MembershipConstants.USER_ID_HEADER;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -59,7 +58,7 @@ public class MembershipControllerTest {
 
     // 멤버십 등록
     @Test
-    public void membershipFailed_NoUserIdInHeaders() throws Exception {
+    public void membershipFailed_noUserIdInHeaders() throws Exception {
         // given
         final String url = "/api/v1/membership";
 
@@ -179,7 +178,7 @@ public class MembershipControllerTest {
 
     // 멤버십 전체 조회
     @Test
-    public void membershipListFailed_NoUserIdInHeaders() throws Exception {
+    public void membershipListFailed_noUserIdInHeaders() throws Exception {
         // given
         final String url = "/api/v1/membership/list";
 
@@ -205,7 +204,76 @@ public class MembershipControllerTest {
         // when
         final ResultActions resultActions = mockMvc.perform(
                 MockMvcRequestBuilders.get(url)
+                        .header(USER_ID_HEADER, "12345")
+        );
+
+        // then
+        resultActions.andExpect(status().isOk());
+    }
+
+    // 멤버십 상세 조회
+    @Test
+    public void membershipDetailFailed_noUserIdInHeaders() throws Exception {
+        // given
+        final String url = "/api/v1/membership";
+
+        // when
+        final ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+        );
+
+        // then
+        resultActions.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void membershipDetailFailed_noMembershipTypeInParameter() throws Exception {
+        // given
+        final String url = "/api/v1/membership";
+
+        // when
+        final ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+                        .header(USER_ID_HEADER, "12345")
+                        .param("membershipType", "empty")
+        );
+
+        // then
+        resultActions.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void membershipDetailFailed_membershipIsNotExist() throws Exception {
+        // given
+        final String url = "/api/v1/membership";
+        doThrow(new MembershipException(MembershipErrorResult.MEMBERSHIP_NOT_FOUND))
+                .when(membershipService)
+                .getMembership("12345", MembershipType.NAVER);
+
+        // when
+        final ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+                        .header(USER_ID_HEADER, "12345")
+                        .param("membershipType", MembershipType.NAVER.name())
+        );
+
+        // then
+        resultActions.andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void membershipDetailSuccess() throws Exception {
+        // given
+        final String url = "/api/v1/membership";
+        doReturn(
+                MembershipDetailResponse.builder().build()
+        ).when(membershipService).getMembership("12345", MembershipType.NAVER);
+
+        // when
+        final ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
                 .header(USER_ID_HEADER, "12345")
+                .param("membershipType", MembershipType.NAVER.name())
         );
 
         // then

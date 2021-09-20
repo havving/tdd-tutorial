@@ -4,6 +4,7 @@ import com.havving.membership.common.DefaultRestController;
 import com.havving.membership.dto.MembershipAddResponse;
 import com.havving.membership.dto.MembershipDetailResponse;
 import com.havving.membership.dto.MembershipRequest;
+import com.havving.membership.enums.MembershipType;
 import com.havving.membership.service.MembershipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -44,6 +45,14 @@ public class MembershipController extends DefaultRestController {
             @RequestHeader(USER_ID_HEADER) final String userId) {
 
         return ResponseEntity.ok(membershipService.getMembershipList(userId));
+    }
+
+    @GetMapping("/api/v1/membership")
+    public ResponseEntity<MembershipDetailResponse> getMembership(
+            @RequestHeader(USER_ID_HEADER) final String userId,
+            @RequestParam final MembershipType membershipType) {
+
+        return ResponseEntity.ok(membershipService.getMembership(userId, membershipType));
     }
 
 }
