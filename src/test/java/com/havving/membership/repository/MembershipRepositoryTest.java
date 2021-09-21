@@ -8,7 +8,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -101,5 +100,21 @@ public class MembershipRepositoryTest {
 
         // then
         assertThat(result.size()).isEqualTo(2);
+    }
+
+    // 멤버십 삭제
+    @Test
+    public void membershipDelete() {
+        // given
+        final Membership naverMembership = Membership.builder()
+                .userId("userId")
+                .membershipType(MembershipType.NAVER)
+                .point(10000)
+                .build();
+
+        final Membership savedMembership = membershipRepository.save(naverMembership);
+
+        // when
+        membershipRepository.deleteById(savedMembership.getId());
     }
 }
