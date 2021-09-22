@@ -32,6 +32,8 @@ public class MembershipServiceTest {
 
     @Mock
     private MembershipRepository membershipRepository;
+    @Mock
+    private RatePointService ratePointService;
     @InjectMocks
     private MembershipService target;
 
@@ -161,7 +163,46 @@ public class MembershipServiceTest {
         target.removeMembership(membershipId, userId);
     }
 
-    private Membership membership() {
+    // 멤버식 포인트 적립
+    @Test
+    public void membershipPointFailed_isNotExist() {
+        // given
+        doReturn(Optional.empty()).when(membershipRepository).findById(membershipId);
+
+        // when
+        final MembershipException result = assertThrows(MembershipException.class, () ->
+                target.accumulateMembershipPoint(membershipId, userId, 10000));
+
+        // then
+        assertThat(result.getErrorResult()).isEqualTo(MembershipErrorResult.MEMBERSHIP_NOT_FOUND);
+    }
+
+    @Test
+    public void membershipPointFailed_isNotOwner() {
+        // given
+        final Membership membership = membership();
+        doReturn(Optional.of(membership)).when(membershipRepository).findById(membershipId);
+
+        // when
+        final MembershipException result = assertThrows(MembershipException.class, () ->
+                target.accumulateMembershipPoint(membershipId, "notowner", 10000));
+
+        // then
+        assertThat(result.getErrorResult()).isEqualTo(MembershipErrorResult.NOT_MEMBERSHIP_OWNER);
+    }
+
+    @Test
+    public void membershipPoint() {
+        // given
+        final Membership membership = membership();
+        doReturn(Optional.of(membership)).when(membershipRepository).findById(membershipId);
+
+        // when
+        target.accumulateMembershipPoint(membershipId, userId, 10000);
+    }
+
+
+   private Membership membership() {
         return Membership.builder()
                 .id(-1L)
                 .userId(userId)
