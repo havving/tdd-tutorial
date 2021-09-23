@@ -6,9 +6,11 @@ import com.havving.membership.dto.MembershipDetailResponse;
 import com.havving.membership.dto.MembershipRequest;
 import com.havving.membership.enums.MembershipType;
 import com.havving.membership.service.MembershipService;
+import com.havving.membership.validation.ValidationGroups;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -30,7 +32,7 @@ public class MembershipController extends DefaultRestController {
     @PostMapping("/api/v1/membership")
     public ResponseEntity<MembershipAddResponse> addMembership(
             @RequestHeader(USER_ID_HEADER) final String userId,
-            @RequestBody @Valid final MembershipRequest membershipRequest) {
+            @RequestBody @Validated(ValidationGroups.MembershipAddMarker.class) final MembershipRequest membershipRequest) {
 
         final MembershipAddResponse membershipResponse =
                 membershipService.addMembership(userId, membershipRequest.getMembershipType(), membershipRequest.getPoint());
@@ -61,6 +63,17 @@ public class MembershipController extends DefaultRestController {
             @PathVariable final Long id) {
 
         membershipService.removeMembership(id, userId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/api/v1/membership/{id}/accumulate")
+    public ResponseEntity<Void> accumulateMembershipPoint(
+            @RequestHeader(USER_ID_HEADER) final String userId,
+            @PathVariable final Long id,
+            @RequestBody @Validated(ValidationGroups.MembershipAccumulateMarker.class) final MembershipRequest membershipRequest) {
+
+        membershipService.accumulateMembershipPoint(id, userId, membershipRequest.getPoint());
 
         return ResponseEntity.noContent().build();
     }
