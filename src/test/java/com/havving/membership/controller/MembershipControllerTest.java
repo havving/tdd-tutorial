@@ -25,7 +25,8 @@ import java.util.Arrays;
 
 import static com.havving.membership.constants.MembershipConstants.USER_ID_HEADER;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -51,7 +52,7 @@ public class MembershipControllerTest {
     }
 
     @Test
-    public void mockMvc_isNotNull() throws Exception {
+    public void mockMvc_isNotNull() {
         assertThat(target).isNotNull();
         assertThat(mockMvc).isNotNull();
     }

@@ -32,8 +32,6 @@ public class MembershipServiceTest {
 
     @Mock
     private MembershipRepository membershipRepository;
-    @Mock
-    private RatePointService ratePointService;
     @InjectMocks
     private MembershipService target;
 
@@ -185,7 +183,7 @@ public class MembershipServiceTest {
 
         // when
         final MembershipException result = assertThrows(MembershipException.class, () ->
-                target.accumulateMembershipPoint(membershipId, "notowner", 10000));
+                target.accumulateMembershipPoint(membershipId, "notOwner", 10000));
 
         // then
         assertThat(result.getErrorResult()).isEqualTo(MembershipErrorResult.NOT_MEMBERSHIP_OWNER);
@@ -202,7 +200,7 @@ public class MembershipServiceTest {
     }
 
 
-   private Membership membership() {
+    private Membership membership() {
         return Membership.builder()
                 .id(-1L)
                 .userId(userId)
